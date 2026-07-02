@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>GitLab Monitoring Dashboard</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <main class="container">
+
+        <!-- ================= HERO ================= -->
+
+        <section class="hero">
+
+            <div class="label">
+                GitLab × n8n / Monitoring System
+            </div>
+
+            <h1>
+                Developer<br>
+                Productivity
+            </h1>
+
+            <p class="desc">
+                Dashboard monitoring aktivitas repository,
+                jumlah commit, developer aktif,
+                dan ranking produktivitas berdasarkan
+                data GitLab API.
+            </p>
+
+        </section>
+
+        <!-- ================= STATISTICS ================= -->
+
+        <section class="stats">
+
+            <div class="stat">
+
+                <p>Total Repository</p>
+
+                <h2 id="totalRepository">
+                    Loading...
+                </h2>
+
+            </div>
+
+            <div class="stat">
+
+                <p>Total Commit</p>
+
+                <h2 id="totalCommit">
+                    Loading...
+                </h2>
+
+            </div>
+
+            <div class="stat">
+
+                <p>Total Developer</p>
+
+                <h2 id="totalDeveloper">
+                    Loading...
+                </h2>
+
+            </div>
+
+        </section>
+
+        <!-- ================= TOP LIST ================= -->
+
+        <section class="grid-2">
+
+            <div class="panel">
+
+                <h2>
+                    Top Developer
+                </h2>
+
+                <div id="topDeveloper">
+                    Loading...
+                </div>
+
+            </div>
+
+            <div class="panel">
+
+                <h2>
+                    Top Repository
+                </h2>
+
+                <div id="topRepository">
+                    Loading...
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ================= BAR CHART ================= -->
+
+        <section class="grid-2">
+
+            <div class="panel chart-panel">
+
+                <h2>
+                    Developer Productivity
+                </h2>
+
+                <canvas id="developerChart"></canvas>
+
+            </div>
+
+            <div class="panel chart-panel">
+
+                <h2>
+                    Repository Activity
+                </h2>
+
+                <canvas id="repositoryChart"></canvas>
+
+            </div>
+
+        </section>
+
+        <!-- ================= PIE CHART ================= -->
+
+        <section>
+
+            <div class="panel pie-panel">
+
+                <h2>
+                    Commit Distribution
+                </h2>
+
+                <canvas id="pieChart"></canvas>
+
+            </div>
+
+        </section>
+
+        <!-- ================= FOOTER ================= -->
+
+        <footer class="footer">
+
+            <span>
+                Source : GitLab API via n8n Webhook
+            </span>
+
+            <span id="lastUpdate">
+                Last Update : -
+            </span>
+
+        </footer>
+
+    </main>
+
+    <!-- Javascript -->
+    <script src="script.js"></script>
+
+</body>
+
+</html>
