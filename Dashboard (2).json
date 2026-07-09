@@ -1,0 +1,154 @@
+{
+  "name": "Dashboard",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "http://172.17.0.2/api/v4/projects",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "PRIVATE-TOKEN",
+              "value": "glpat-UzBaeVDmYhLxSM-rBapPfG86MQp1OjMH.01.0w0ixlr47"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "1dd6373f-ae2d-4454-9201-3b52679c8886",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "=http://172.17.0.2/api/v4/projects/{{$json.id}}/repository/commits",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "PRIVATE-TOKEN",
+              "value": "glpat-UzBaeVDmYhLxSM-rBapPfG86MQp1OjMH.01.0w0ixlr47"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        640,
+        0
+      ],
+      "id": "fba2c791-ffc2-4c31-ae69-0621430281bc",
+      "name": "GET COMMITS"
+    },
+    {
+      "parameters": {
+        "path": "dashboard2",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "5c3c04be-ecce-4d58-978c-155096a6f299",
+      "name": "Webhook",
+      "webhookId": "a072e85f-c242-4380-badc-d75bf2affe34"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $input.first().json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "7692c127-d08b-44d0-9e85-6b415666f72d",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===============================\n// Generate Dashboard Metrics\n// ===============================\n\nconst commits = $input.all();\n\n// Total Commit\nconst totalCommit = commits.length;\n\n// Total Repository\nconst repoSet = new Set();\n\n// Hitung commit developer\nconst developerCount = {};\n\n// Hitung commit repository\nconst repositoryCount = {};\n\nfor (const item of commits) {\n\n  // -----------------------\n  // Developer\n  // -----------------------\n  const developer =\n    item.json.author_name ||\n    item.json.committer_name ||\n    \"Unknown\";\n\n  developerCount[developer] =\n    (developerCount[developer] || 0) + 1;\n\n\n// -----------------------\n// Repository\n// -----------------------\n\nlet repository =\n  item.json.project_name ||\n  item.json.project?.name;\n\nif (!repository && item.json.web_url) {\n const parts = item.json.web_url.split(\"/\");\nrepository = parts[4];\n}\n\nrepository = repository || \"Unknown Repository\";\n\nrepoSet.add(repository);\n\nrepositoryCount[repository] =\n  (repositoryCount[repository] || 0) + 1;\n\n}\n// ===============================\n// Total Developer\n// ===============================\n\nconst totalDeveloper =\nObject.keys(developerCount).length;\n\n\n// ===============================\n// Top Developer\n// ===============================\n\nconst topDeveloper =\nObject.entries(developerCount)\n\n.sort((a,b)=>b[1]-a[1])\n\n.slice(0,5)\n\n.map(([developer,total_commit])=>({\n\ndeveloper,\n\ntotal_commit\n\n}));\n\n\n// ===============================\n// Top Repository\n// ===============================\n\nconst topRepository =\nObject.entries(repositoryCount)\n\n.sort((a,b)=>b[1]-a[1])\n\n.slice(0,5)\n\n.map(([repository,total_commit])=>({\n\nrepository,\n\ntotal_commit\n\n}));\n\n\n// ===============================\n// Return\n// ===============================\n\nreturn [\n{\njson:{\n\ntotalRepository:repoSet.size,\n\ntotalCommit,\n\ntotalDeveloper,\n\ntopDeveloper,\n\ntopRepository\n\n}\n}\n];\nconsole.log(commits.map(c => c.json.author_name));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ],
+      "id": "432706fc-660d-49cd-87dd-27629322128a",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "GET COMMITS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET COMMITS": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "57cc828c-3c52-4972-a6c6-6cdce902b5bf",
+  "meta": {
+    "instanceId": "7ce1915aa0bf2edbb7eb4935d263a3e5296f081be425512bba1a2be209ee1197"
+  },
+  "nodeGroups": [],
+  "id": "qNtuiJWnYI22Y8b7",
+  "tags": []
+}
